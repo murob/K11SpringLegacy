@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class FileuploadController {
@@ -156,5 +157,28 @@ public class FileuploadController {
 		
 		model.addAttribute("fileMap", fileMap);
 		return "06FileUpload/uploadList";
+	}
+	
+	//파일 다운로드
+	@RequestMapping("/fileUpload/download.do")
+	public ModelAndView download(HttpServletRequest req, HttpServletResponse resp) throws Exception{
+		//저장된 파일명
+		String fileName = req.getParameter("fileName");
+		//원본 파일명
+		String oriFileName = req.getParameter("oriFileName");
+		//물리적 경로
+		String saveDirectory = req.getSession().getServletContext().getRealPath("/resources/upload");
+		//경로와 파일명을 통해 파일객체 생성
+		File downloadFile = new File(saveDirectory+"/"+fileName);
+		//해당 경로에 파일이 있는지 확인
+		if(!downloadFile.canRead()) {
+			throw new Exception("파일을 찾을 수 없습니다.");
+		}
+		
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("fileDownloadView");
+		mv.addObject("downloadFile", downloadFile);
+		mv.addObject("oriFileName", oriFileName);
+		return mv;
 	}
 }
